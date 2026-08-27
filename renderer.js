@@ -4,6 +4,20 @@ let isPaused = false;
 let pollTimeout = null;
 let currentIsMock = false;
 
+// Determine standard junction thermal limit for AMD cards
+function getJunctionLimit(cardSeries, gfxVersion) {
+  if (gfxVersion) {
+    const v = gfxVersion.toLowerCase();
+    if (v.includes('gfx900') || v.includes('gfx906')) return 105;
+    if (v.includes('gfx10') || v.includes('gfx11')) return 110;
+  }
+  if (cardSeries) {
+    const s = cardSeries.toLowerCase();
+    if (s.includes('vega') || s.includes('vii') || s.includes('instinct') || s.includes('mi')) return 105;
+  }
+  return 105; // safe default
+}
+
 // Initialize charts for a specific GPU card
 function initCharts(cardKey) {
   // 1. GPU Use Gauge
@@ -180,7 +194,10 @@ function initCharts(cardKey) {
       vramVal: document.getElementById(`${cardKey}-vram-val`),
       tempVal: document.getElementById(`${cardKey}-temp-val`),
       tempJunction: document.getElementById(`${cardKey}-temp-junction`),
-      tempMemory: document.getElementById(`${cardKey}-temp-memory`)
+      tempMemory: document.getElementById(`${cardKey}-temp-memory`),
+      statusJunction: document.getElementById(`${cardKey}-status-junction`),
+      statusLimit: document.getElementById(`${cardKey}-status-limit`),
+      statusMargin: document.getElementById(`${cardKey}-status-margin`)
     }
   };
 }
@@ -239,6 +256,21 @@ function createGpuCard(cardKey) {
         <div class="detail-item">
           <span class="detail-label">Memory Temp</span>
           <span class="detail-value" id="${cardKey}-temp-memory">-- °C</span>
+        </div>
+      </div>
+
+      <div class="thermal-status" style="background: rgba(0, 0, 0, 0.2); border-radius: var(--border-radius-md); padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.03); font-family: var(--font-mono); font-size: 0.85rem; display: flex; flex-direction: column; gap: 4px;">
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-secondary); white-space: pre;">Junction:</span>
+          <span id="${cardKey}-status-junction" style="color: var(--text-primary); font-weight: 700;">--°C</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-secondary); white-space: pre;">Limit:   </span>
+          <span id="${cardKey}-status-limit" style="color: var(--warning); font-weight: 700;">--°C</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-secondary); white-space: pre;">Margin:  </span>
+          <span id="${cardKey}-status-margin" style="color: var(--success); font-weight: 700;">--°C</span>
         </div>
       </div>
 
@@ -332,15 +364,37 @@ function updateUI(stats) {
     gpu.elements.tempJunction.textContent = `${tempJunc.toFixed(1)} °C`;
     gpu.elements.tempMemory.textContent = isNaN(tempMem) || tempMem === 0 ? 'N/A' : `${tempMem.toFixed(1)} °C`;
 
-    // Dynamic model label name fallback
-    if (currentIsMock) {
+    const cardSeries = cardData["Card Series"] || "";
+    const cardModel = cardData["Card Model"] || "";
+    const gfxVersion = cardData["GFX Version"] || "";
+
+    // Dynamic model label name with marketing name
+    if (cardSeries) {
+      gpu.elements.model.textContent = `${cardSeries} (${cardModel || cardKey.toUpperCase()})`;
+    } else if (currentIsMock) {
       if (cardKey === 'card0') {
-        gpu.elements.model.textContent = 'AMD Radeon RX 7900 XTX (Navi 31)';
+        gpu.elements.model.textContent = 'AMD Radeon RX Vega (0x687f)';
       } else if (cardKey === 'card1') {
-        gpu.elements.model.textContent = 'AMD Radeon RX 7600 (Navi 33)';
+        gpu.elements.model.textContent = 'AMD Radeon VII (0x66af)';
       }
     } else {
       gpu.elements.model.textContent = `AMD ROCm Device (${cardKey.toUpperCase()})`;
+    }
+
+    // Calculate junction temperature limit and margin
+    const limit = getJunctionLimit(cardSeries, gfxVersion);
+    const margin = limit - tempJunc;
+
+    gpu.elements.statusJunction.textContent = `${tempJunc.toFixed(1)}°C`;
+    gpu.elements.statusLimit.textContent = `${limit}°C`;
+    gpu.elements.statusMargin.textContent = `${margin.toFixed(1)}°C`;
+
+    if (margin > 20) {
+      gpu.elements.statusMargin.style.color = 'var(--success)';
+    } else if (margin >= 10) {
+      gpu.elements.statusMargin.style.color = 'var(--warning)';
+    } else {
+      gpu.elements.statusMargin.style.color = 'var(--error)';
     }
 
     // Update half-doughnut gauge dataset arrays

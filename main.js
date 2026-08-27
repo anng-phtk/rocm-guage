@@ -31,7 +31,16 @@ function generateMockStats() {
       "Current Socket Graphics Package Power (W)": gpu0Power.toFixed(1),
       "GPU use (%)": Math.min(100, Math.max(0, gpu0Use)).toString(),
       "GPU Memory Allocated (VRAM%)": Math.min(100, Math.max(0, gpu0Vram)).toString(),
-      "Memory Activity": "N/A"
+      "Memory Activity": "N/A",
+      "Card Series": "AMD Radeon RX Vega",
+      "Card Model": "0x687f",
+      "Card Vendor": "Advanced Micro Devices, Inc. [AMD/ATI]",
+      "Card SKU": "N/A",
+      "Subsystem ID": "0x2387",
+      "Device Rev": "0xc1",
+      "Node ID": "1",
+      "GUID": "11999",
+      "GFX Version": "gfx900"
     },
     "card1": {
       "Temperature (Sensor edge) (C)": gpu1Temp.toFixed(1),
@@ -40,7 +49,16 @@ function generateMockStats() {
       "Current Socket Graphics Package Power (W)": gpu1Power.toFixed(1),
       "GPU use (%)": Math.min(100, Math.max(0, gpu1Use)).toString(),
       "GPU Memory Allocated (VRAM%)": Math.min(100, Math.max(0, gpu1Vram)).toString(),
-      "Memory Activity": "N/A"
+      "Memory Activity": "N/A",
+      "Card Series": "AMD Radeon VII",
+      "Card Model": "0x66af",
+      "Card Vendor": "Advanced Micro Devices, Inc. [AMD/ATI]",
+      "Card SKU": "D3600200",
+      "Subsystem ID": "0x081e",
+      "Device Rev": "0xc1",
+      "Node ID": "2",
+      "GUID": "64665",
+      "GFX Version": "gfx906"
     },
     "_isMock": true
   };
@@ -52,7 +70,7 @@ async function queryGpuStats() {
   }
 
   try {
-    const { stdout } = await execPromise('rocm-smi --json --showtemp --showuse --showmemuse --showpower');
+    const { stdout } = await execPromise('rocm-smi --json --showtemp --showuse --showmemuse --showpower --showproductname');
     const startIdx = stdout.indexOf('{');
     const endIdx = stdout.lastIndexOf('}');
     
