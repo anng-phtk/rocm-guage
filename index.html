@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROCm GPU Monitor</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app-container">
+    <header>
+      <div class="brand">
+        <div class="logo-icon">R</div>
+        <h1>ROCm GPU Monitor</h1>
+        <div id="status-badge" class="status-container">
+          <div id="status-dot" class="status-dot live"></div>
+          <span id="status-text">LIVE (ROCm)</span>
+        </div>
+      </div>
+      
+      <div class="controls">
+        <div class="btn-group">
+          <button id="btn-500" class="btn" data-interval="500">500ms</button>
+          <button id="btn-750" class="btn" data-interval="750">750ms</button>
+          <button id="btn-1000" class="btn active" data-interval="1000">1.0s</button>
+        </div>
+        
+        <button id="btn-play-pause" class="btn-action">
+          <svg id="play-pause-icon" viewBox="0 0 24 24">
+            <!-- Pause Icon (default) -->
+            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+          </svg>
+          <span id="play-pause-text">Pause</span>
+        </button>
+      </div>
+    </header>
+
+    <main id="gpu-grid">
+      <!-- GPU monitor cards will be dynamically injected here -->
+      <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-secondary);">
+        Initializing ROCm connection and loading metrics...
+      </div>
+    </main>
+
+    <footer>
+      <span>AMD ROCm Monitoring Utility</span>
+      <span>•</span>
+      <span id="refresh-time">Last update: --:--:--</span>
+    </footer>
+  </div>
+
+  <script src="node_modules/chart.js/dist/chart.umd.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>
