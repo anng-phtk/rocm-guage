@@ -2,6 +2,8 @@
 
 A lightweight, beautiful, and interactive Electron application to monitor AMD GPU metrics (`rocm-smi`) in real-time. It is designed to run on Linux alongside your inference containers, training loops, or Stable Diffusion workloads, displaying crucial hardware metrics with rich, responsive visualizations.
 
+![AMD ROCm GPU Monitor Screenshot](screenshots/screenshot1.png)
+
 ## Features
 
 - **Dynamic Multi-GPU Support**: Automatically detects all available GPUs (`card0`, `card1`, etc.) and scales the layout in a responsive grid.
